@@ -14,6 +14,7 @@ struct FSlateBrush;
 struct ImGuiContext;
 struct ImGuiViewport;
 struct ImPlotContext;
+struct ImFont;
 
 struct IMGUI_API FImGuiViewportData
 {
@@ -56,6 +57,12 @@ public:
 	/// Access to the underlying ImPlot context
 	operator ImPlotContext*() const;
 
+	/// Find a Font
+	ImFont* FindFont(const FName ID) const;
+
+	/// Registers a Font
+	void RegisterFontID(ImFont* InFont, const FName FontID);
+
 private:
 	void Initialize();
 
@@ -63,6 +70,7 @@ private:
 
 	ImGuiContext* Context = nullptr;
 	ImPlotContext* PlotContext = nullptr;
+	TMap<FName, ImFont*> Fonts = {};
 
 	char IniFilenameUtf8[1024] = {};
 	char LogFilenameUtf8[1024] = {};

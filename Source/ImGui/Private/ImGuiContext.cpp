@@ -393,10 +393,20 @@ void FImGuiContext::Initialize()
 	PlatformIO.Platform_SetClipboardTextFn = ImGui_SetClipboardText;
 	PlatformIO.Platform_OpenInShellFn = ImGui_OpenInShell;
 
-	const FString FontPath = FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf");
-	if (FPaths::FileExists(*FontPath))
+	static const FName FontID_Default = FName("Default");
+	static const FName FontID_Monospace = FName("Mono");
+
+	const FString DefaultFontPath = FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf");
+	const FString MonoFontPath = FPaths::EngineContentDir() / TEXT("Slate/Fonts/DroidSansMono.ttf");
+
+	if (FPaths::FileExists(*DefaultFontPath))
 	{
-		IO.Fonts->AddFontFromFileTTF(TCHAR_TO_UTF8(*FontPath), 16);
+		RegisterFontID(IO.Fonts->AddFontFromFileTTF(TCHAR_TO_UTF8(*DefaultFontPath), 16), FontID_Default);
+	}
+	
+	if (FPaths::FileExists(*MonoFontPath))
+	{
+		RegisterFontID(IO.Fonts->AddFontFromFileTTF(TCHAR_TO_UTF8(*MonoFontPath), 16), FontID_Monospace);
 	}
 
 	if (FSlateApplication::IsInitialized())
@@ -513,6 +523,18 @@ FImGuiContext::operator ImGuiContext*() const
 FImGuiContext::operator ImPlotContext*() const
 {
 	return PlotContext;
+}
+
+ImFont* FImGuiContext::FindFont(const FName ID) const
+{
+	ImFont* Font = Fonts.FindRef(ID);
+	return Font ? Font : ImGui::GetDefaultFont();
+}
+
+void FImGuiContext::RegisterFontID(ImFont* InFont, const FName FontID)
+{
+	check(InFont != nullptr);
+	Fonts.Add(FontID, InFont);
 }
 
 void FImGuiContext::OnDisplayMetricsChanged(const FDisplayMetrics& DisplayMetrics)
