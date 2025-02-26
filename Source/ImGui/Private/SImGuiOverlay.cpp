@@ -325,14 +325,23 @@ int32 SImGuiOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGe
 		for (const ImDrawCmd& DrawCmd : DrawList.CmdBuffer)
 		{
 #if WITH_ENGINE
-			UTexture* Texture = DrawCmd.GetTexID();
-			if (TextureBrush.GetResourceObject() != Texture)
+			UObject* Resource = DrawCmd.GetTexID();
+			if (TextureBrush.GetResourceObject() != Resource)
 			{
-				TextureBrush.SetResourceObject(Texture);
-				if (IsValid(Texture))
+				TextureBrush.SetResourceObject(Resource);
+				if (IsValid(Resource))
 				{
-					TextureBrush.ImageSize.X = Texture->GetSurfaceWidth();
-					TextureBrush.ImageSize.Y = Texture->GetSurfaceHeight();
+					if (UTexture* AsTexture = Cast<UTexture>(Resource))
+					{
+						TextureBrush.ImageSize.X = AsTexture->GetSurfaceWidth();
+						TextureBrush.ImageSize.Y = AsTexture->GetSurfaceHeight();
+					}
+					else
+					{
+						TextureBrush.ImageSize.X = SlateBrushDefs::DefaultImageSize;
+						TextureBrush.ImageSize.Y = SlateBrushDefs::DefaultImageSize;
+					}
+					
 					TextureBrush.ImageType = ESlateBrushImageType::FullColor;
 					TextureBrush.DrawAs = ESlateBrushDrawType::Image;
 				}
